@@ -101,6 +101,8 @@ for combo in "${COMBOS[@]}"; do
 			    pkg = json.load(f, object_pairs_hook=collections.OrderedDict)
 			pkg["devDependencies"]["git-cliff"] = "^2.13.1"
 			pkg["devDependencies"]["lefthook"] = "^2.1.10"
+			pkg["devDependencies"]["@commitlint/cli"] = "^21.2.2"
+			pkg["devDependencies"]["@commitlint/config-conventional"] = "^21.2.2"
 			pkg["devDependencies"] = collections.OrderedDict(
 			    sorted(pkg["devDependencies"].items())
 			)

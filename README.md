@@ -58,6 +58,16 @@ These files are **byte-identical in all seven templates**:
 | `scripts/commit-msg.sh` | Conventional Commits enforcement |
 | `.editorconfig` | Indentation and whitespace |
 
+`scripts/commit-msg.sh` itself decides how to enforce that: a bash regex by
+default, or a delegation to [commitlint][cl] if a `commitlint.config.*` and its
+binary are present. Only `ts-npm` ships that by default: it already pulls
+lefthook and git-cliff through `devDependencies`, so commitlint fits the same
+path. `ts-make` and `ts-just` deliberately don't, per the Node-off-npm
+principle above, but adding commitlint to either turns the same script's
+behavior on without editing it.
+
+[cl]: https://commitlint.js.org
+
 Every template exposes the same tasks, and they mean the same thing:
 
 | Task | |
@@ -87,7 +97,7 @@ npm run release -- v1.2.3
 Every task is defined once, in `scripts/tasks.sh`. The runner, the git hooks
 and CI are all thin wrappers that shell out to it:
 
-```
+```text
 make test  --+
 just test  --+
 npm test   --+--> scripts/tasks.sh test --> go test -race ./...
@@ -121,7 +131,7 @@ way; the difference lives in each flavor's `bump-version` task.
 bash and python3; python3 merges the extra devDependencies into the `ts-npm`
 `package.json` rather than keeping a second copy of that file in `src/`.
 
-```
+```text
 src/core/          identical in every template
                      release.sh, cliff.toml, lefthook.yml, commit-msg.sh,
                      issue templates, and tasks.head.sh / tasks.tail.sh

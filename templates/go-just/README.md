@@ -65,14 +65,20 @@ fix(parser): handle an empty input
 refactor!: drop the legacy entry point
 ```
 
+If [commitlint][cl] is set up (a `commitlint.config.*` is present and its
+binary is installed), `scripts/commit-msg.sh` delegates to it instead of its
+own regex, so you get commitlint's real parser and config resolution. This
+happens automatically; nothing needs editing to turn it on or off.
+
 [cc]: https://www.conventionalcommits.org
+[cl]: https://commitlint.js.org
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
 | `scripts/tasks.sh` | What every task means. Edit this to change behaviour. |
-| `scripts/commit-msg.sh` | Conventional Commits check, run by the git hook |
+| `scripts/commit-msg.sh` | Conventional Commits check, run by the git hook (delegates to commitlint if it's set up) |
 | `release.sh` | The release flow. Identical in every template. |
 | `cliff.toml` | Changelog generation rules |
 | `lefthook.yml` | Which hooks run which tasks |

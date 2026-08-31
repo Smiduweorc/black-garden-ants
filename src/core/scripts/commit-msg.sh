@@ -3,12 +3,29 @@
 # Validates a commit message against Conventional Commits, so git-cliff can
 # build a changelog from the history. Invoked by the commit-msg git hook.
 #
+# If commitlint is set up (a commitlint.config.* is present and its binary is
+# installed), that's used instead: it gets the real parser and config
+# resolution rather than a hand-rolled regex. This file is otherwise identical
+# across every template, so a project picks up commitlint just by adding it;
+# nothing here needs to change to notice.
+#
 # Usage: scripts/commit-msg.sh <path-to-commit-msg-file>
 
 set -eu
 
 file="${1:-}"
 [ -n "$file" ] || { echo "usage: scripts/commit-msg.sh <file>" >&2; exit 2; }
+
+if [ -x node_modules/.bin/commitlint ]; then
+	for cfg in commitlint.config.js commitlint.config.mjs commitlint.config.cjs \
+		commitlint.config.ts .commitlintrc.json .commitlintrc.js; do
+		if [ -f "$cfg" ]; then
+			exec node_modules/.bin/commitlint --edit "$file"
+		fi
+	done
+fi
+
+# --- Fallback: commitlint isn't set up, so check by hand. ---
 
 # The subject is the first non-blank, non-comment line: git appends its own
 # commented help text to the message file.
