@@ -1,0 +1,5 @@
+/app
+dist
+coverage.out
+*.log
+.DS_Store

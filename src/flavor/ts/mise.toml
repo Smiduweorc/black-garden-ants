@@ -1,0 +1,6 @@
+# Pinned tooling. Node is here because TypeScript needs it; lefthook and
+# git-cliff come as single binaries rather than through npm.
+[tools]
+node = "24"
+lefthook = "2"
+git-cliff = "2"

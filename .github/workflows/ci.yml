@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Templates are in sync and consistent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Regenerates templates/ and fails if the committed output differs, so
+      # an edit to src/ can never ship without a rebuild.
+      - name: Consistency checks
+        run: ./check.sh
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Shellcheck the generated scripts
+        run: |
+          shellcheck build.sh check.sh
+          shellcheck templates/*/release.sh templates/*/scripts/*.sh
+
+  smoke-go:
+    name: Smoke test (${{ matrix.template }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [go-make, go-just]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.25"
+          cache: false
+      - name: lint / test / build
+        working-directory: templates/${{ matrix.template }}
+        run: |
+          scripts/tasks.sh lint
+          scripts/tasks.sh test
+          scripts/tasks.sh build
+
+  smoke-ts:
+    name: Smoke test (${{ matrix.template }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [ts-npm, ts-make]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        working-directory: templates/${{ matrix.template }}
+        run: npm install --no-audit --no-fund
+      - name: lint / test / build
+        working-directory: templates/${{ matrix.template }}
+        run: |
+          scripts/tasks.sh lint
+          scripts/tasks.sh test
+          scripts/tasks.sh build
+
+  smoke-bare:
+    name: Smoke test (bare-make)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: lint / test / build
+        working-directory: templates/bare-make
+        run: |
+          scripts/tasks.sh lint
+          scripts/tasks.sh test
+          scripts/tasks.sh build

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+    paths-ignore: ["**.md"]
+  pull_request:
+    branches: [master]
+    paths-ignore: ["**.md"]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, test & build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Installs everything pinned in mise.toml: the language toolchain plus
+      # lefthook and git-cliff. No Node involved.
+      - name: Install pinned tools
+        uses: jdx/mise-action@v4
+
+      - name: Lint
+        run: scripts/tasks.sh lint
+
+      - name: Test
+        run: scripts/tasks.sh test
+
+      - name: Build
+        run: scripts/tasks.sh build

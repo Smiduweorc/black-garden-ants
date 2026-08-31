@@ -1,0 +1,39 @@
+{
+	"name": "app",
+	"version": "0.0.0",
+	"description": "",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"setup": "scripts/tasks.sh setup",
+		"fmt": "scripts/tasks.sh fmt",
+		"lint": "scripts/tasks.sh lint",
+		"test": "scripts/tasks.sh test",
+		"build": "scripts/tasks.sh build",
+		"changelog": "scripts/tasks.sh changelog",
+		"release": "scripts/tasks.sh release",
+		"preflight": "scripts/tasks.sh preflight",
+		"hooks": "scripts/tasks.sh hooks",
+		"clean": "scripts/tasks.sh clean",
+		"help": "scripts/tasks.sh help"
+	},
+	"license": "ISC",
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@types/node": "^26.2.0",
+		"eslint": "^10.8.1",
+		"tsx": "^4.23.12",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.67.0"
+	}
+}

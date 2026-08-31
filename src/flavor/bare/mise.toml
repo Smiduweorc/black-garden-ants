@@ -1,0 +1,7 @@
+# Pinned tooling. `mise install` fetches these as single binaries; no Node,
+# no package manager, nothing installed globally.
+[tools]
+lefthook = "2"
+git-cliff = "2"
+shellcheck = "latest"
+shfmt = "latest"
