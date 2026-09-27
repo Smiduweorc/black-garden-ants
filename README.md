@@ -70,11 +70,16 @@ The script also delegates to [commitlint-rs][clrs] when a `.commitlintrc`,
 `.commitlintrc.json`, `.commitlintrc.yaml` or `.commitlintrc.yml` is present
 and the `commitlint` on `PATH` reports itself as commitlint-rs. That is for
 Rust projects, which pin it through mise rather than npm; no template here
-ships it. commitlint-rs has no rule for the length of the whole subject, so the
-script's 100-character cap runs on that path too.
+ships it, but [rustCrateTemplate][rct] does, with a `.commitlintrc.yml` that
+mirrors `@commitlint/config-conventional`. commitlint-rs has no rules for the
+rest of that config, so on that path the script also caps the header and each
+body and footer line at 100 characters, rejects whitespace around the header,
+and warns when the body does not follow a blank line. commitlint-rs 0.2 cannot
+parse a bare `.commitlintrc`, so use one of the other names.
 
 [cl]: https://commitlint.js.org
 [clrs]: https://github.com/KeisukeYamashita/commitlint-rs
+[rct]: https://github.com/Smiduweorc/rustCrateTemplate
 
 Every template exposes the same tasks, and they mean the same thing:
 

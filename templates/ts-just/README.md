@@ -70,7 +70,9 @@ binary is installed), `scripts/commit-msg.sh` delegates to it instead of its
 own regex, so you get commitlint's real parser and config resolution. The same
 goes for [commitlint-rs][clrs]: a `.commitlintrc`, `.commitlintrc.json`,
 `.commitlintrc.yaml` or `.commitlintrc.yml` plus a commitlint-rs binary on
-`PATH`. This happens automatically; nothing needs editing to turn it on or off.
+`PATH`, with the script checking the `@commitlint/config-conventional` rules
+commitlint-rs lacks (line lengths, whitespace around the header). This happens
+automatically; nothing needs editing to turn it on or off.
 
 [cc]: https://www.conventionalcommits.org
 [cl]: https://commitlint.js.org
