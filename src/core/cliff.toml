@@ -34,14 +34,16 @@ filter_unconventional = true
 split_commits = false
 # Order matters: the first parser that matches wins. The skips come first so a
 # release or dependency commit is dropped whatever else it says, then the
-# security rule, then the per-type groups. A commit type absent from this list
-# is dropped from the changelog entirely, so every type scripts/commit-msg.sh
-# accepts has to appear here.
+# security rule, then the per-type groups. git-cliff matches `message` against
+# the whole commit message, body included, so the security rule catches
+# "security" in any case in the subject or the body. A commit no parser matches
+# is still kept (filter_commits = false), under a heading named after its raw
+# type, so every type scripts/commit-msg.sh accepts is mapped to a group here.
 commit_parsers = [
   { message = "^chore\\(release\\): prepare for", skip = true },
   # Covers both chore(deps) and dependabot's chore(deps-dev).
   { message = "^chore\\(deps", skip = true },
-  { body = ".*security", group = "Security" },
+  { message = "(?i)security", group = "Security" },
   { message = "^feat", group = "Features" },
   { message = "^fix", group = "Bug Fixes" },
   { message = "^doc", group = "Documentation" },
