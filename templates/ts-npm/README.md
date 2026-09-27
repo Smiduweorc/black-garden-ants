@@ -67,11 +67,14 @@ refactor!: drop the legacy entry point
 
 If [commitlint][cl] is set up (a `commitlint.config.*` is present and its
 binary is installed), `scripts/commit-msg.sh` delegates to it instead of its
-own regex, so you get commitlint's real parser and config resolution. This
-happens automatically; nothing needs editing to turn it on or off.
+own regex, so you get commitlint's real parser and config resolution. The same
+goes for [commitlint-rs][clrs]: a `.commitlintrc`, `.commitlintrc.json`,
+`.commitlintrc.yaml` or `.commitlintrc.yml` plus a commitlint-rs binary on
+`PATH`. This happens automatically; nothing needs editing to turn it on or off.
 
 [cc]: https://www.conventionalcommits.org
 [cl]: https://commitlint.js.org
+[clrs]: https://github.com/KeisukeYamashita/commitlint-rs
 
 ## Layout
 

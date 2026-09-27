@@ -66,7 +66,15 @@ path. `ts-make` and `ts-just` deliberately don't, per the Node-off-npm
 principle above, but adding commitlint to either turns the same script's
 behavior on without editing it.
 
+The script also delegates to [commitlint-rs][clrs] when a `.commitlintrc`,
+`.commitlintrc.json`, `.commitlintrc.yaml` or `.commitlintrc.yml` is present
+and the `commitlint` on `PATH` reports itself as commitlint-rs. That is for
+Rust projects, which pin it through mise rather than npm; no template here
+ships it. commitlint-rs has no rule for the length of the whole subject, so the
+script's 100-character cap runs on that path too.
+
 [cl]: https://commitlint.js.org
+[clrs]: https://github.com/KeisukeYamashita/commitlint-rs
 
 Every template exposes the same tasks, and they mean the same thing:
 
