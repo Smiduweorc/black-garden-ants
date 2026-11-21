@@ -13,6 +13,9 @@
 #     adds the @commitlint/config-conventional checks commitlint-rs has no
 #     rules for. commitlint-rs 0.2 fails to parse a bare .commitlintrc, so use
 #     one of the others.
+#   - conventionalcommit/commitlint (Go): a .commitlint.yaml or .commitlint.yml
+#     is present. Go projects pin it as a go.mod tool directive; anything
+#     else needs it on PATH.
 #
 # This file is otherwise identical across every template, so a project picks
 # up either one just by adding it; nothing here needs to change to notice.
@@ -42,6 +45,27 @@ subject="$(grep -v '^#' "$file" | sed '/^[[:space:]]*$/d' | head -n 1)"
 case "$subject" in
 	Merge\ * | Revert\ * | Reapply\ * | fixup!* | squash!* | amend!*) exit 0 ;;
 esac
+
+# conventionalcommit/commitlint, the Go port. A Go project pins it with a
+# tool directive in go.mod (`go get -tool github.com/conventionalcommit/commitlint`)
+# and runs it through `go tool`, so its version lives in go.mod/go.sum. Other
+# projects can put the binary on PATH; it prints "commitlint version" in
+# --version, which tells it apart from the Node and Rust binaries of that name.
+# stdin is /dev/null because this commitlint prefers piped stdin over --message.
+for cfg in .commitlint.yaml .commitlint.yml; do
+	[ -f "$cfg" ] || continue
+	if [ -f go.mod ] && grep -Eq '^[[:space:]]*(tool[[:space:]]+)?github\.com/conventionalcommit/commitlint[[:space:]]*$' go.mod; then
+		go tool commitlint lint --config "$cfg" --message "$file" </dev/null
+	elif command -v commitlint >/dev/null 2>&1 &&
+		commitlint --version 2>/dev/null | grep -q '^commitlint version '; then
+		commitlint lint --config "$cfg" --message "$file" </dev/null
+	else
+		echo "$cfg is present but conventionalcommit/commitlint is not installed." >&2
+		echo "Go: go get -tool github.com/conventionalcommit/commitlint@latest" >&2
+		exit 1
+	fi
+	exit $?
+done
 
 # commitlint-rs and Node's commitlint both install a binary named commitlint;
 # only commitlint-rs prints its package name in --version.

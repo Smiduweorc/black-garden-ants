@@ -43,7 +43,7 @@ task_hooks() {
 		return 0
 	fi
 	say "Installing git hooks"
-	lefthook install
+	run_lefthook install
 }
 
 task_help() {

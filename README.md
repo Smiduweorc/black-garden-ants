@@ -69,10 +69,17 @@ with a regex, unless one of these is set up:
   lines, no whitespace around the subject, and a warning when the body does
   not follow a blank line. commitlint-rs 0.2 cannot parse a bare
   `.commitlintrc`, so use one of the other names.
+- [conventionalcommit/commitlint][clgo] (Go): a `.commitlint.yaml` or
+  `.commitlint.yml`. The Go templates ship it, pinned as a `tool` directive
+  in `go.mod` and run with `go tool commitlint`, so its version is locked in
+  `go.sum` like any other dependency. Other flavors can use it by putting the
+  binary on `PATH`. Its config's `type-enum` must match the groups in
+  `cliff.toml`.
 
 [cc]: https://www.conventionalcommits.org
 [cl]: https://commitlint.js.org
 [clrs]: https://github.com/KeisukeYamashita/commitlint-rs
+[clgo]: https://github.com/conventionalcommit/commitlint
 [rct]: https://github.com/Smiduweorc/rustCrateTemplate
 
 ## Releasing
