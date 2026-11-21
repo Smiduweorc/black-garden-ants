@@ -1,13 +1,13 @@
 # black-garden-ants
 
 Project templates for Go, TypeScript and repos with no compiler, driven by
-make, just or npm. All seven share the same commit hook, changelog config and
+make, just or package.json scripts. All seven share the same commit hook, changelog config and
 release script; only the language and the runner differ.
 
 Pull one down with [degit][dg]:
 
 ```sh
-npx degit Smiduweorc/black-garden-ants/templates/go-just my-project
+bunx degit Smiduweorc/black-garden-ants/templates/go-just my-project
 cd my-project && git init && just setup
 ```
 
@@ -24,16 +24,39 @@ cd my-project && git init && just setup
 `bare` is for repos with no compiler (shell utilities, packaging,
 documentation) that still want changelogs and tagged releases.
 
-The column decides whether the dev tooling comes from npm. With `make` or
-`just`, [mise][ms] installs the pinned toolchain plus [lefthook][lh] and
+The column decides where the dev tooling comes from. With `make` or `just`,
+[mise][ms] installs the pinned toolchain plus [lefthook][lh] and
 [git-cliff][gc] as single binaries, so `bare` and `go` have no Node, no
-`package.json` and no npm entry in Dependabot. `ts-make` and `ts-just` use npm
-for the project's own dependencies only. `make` needs nothing extra installed;
-`just` has the nicer syntax. `npm` installs the same tools from
-`devDependencies` and only exists for `ts`, where Node is already there.
+`package.json` and no package-manager entry in Dependabot. `ts-make` and
+`ts-just` use `package.json` for the project's own dependencies only. `make`
+needs nothing extra installed; `just` has the nicer syntax. The `npm` column
+drives everything through `package.json` scripts (run with `bun run`) and
+installs the same tools from `devDependencies`; it only exists for `ts`.
 
 CI smoke-tests `go-make`, `go-just`, `ts-make`, `ts-npm` and `bare-make`.
 `ts-just` and `bare-just` are only checked for consistency.
+
+### TypeScript: Bun first, Node supported
+
+Every `ts` template treats Bun as the package manager (`bun.lock`, no
+`package-lock.json`) and the main runtime, and Node as a supported runtime:
+
+- Library code uses only what both have: `node:*` modules and web standards.
+  `tsconfig.json` loads only Node's types, so a `Bun.*` global fails `lint`.
+  A Bun-only fast path goes in its own module behind a `"bun"` condition in
+  `exports`, with a plain fallback.
+- Tests are written once against `node:test` and `node:assert`. `test` runs
+  them with `bun test` and then with `node --test` (through tsx). Without Node
+  on `PATH` the Node run is skipped locally, but fails in CI.
+- `scripts/pack-check.sh` packs the tarball, installs it into a scratch
+  project and imports it under Bun and Node, which catches broken `exports`,
+  `types` or `files`. CI runs it after the build.
+- Bun's version is pinned in `mise.toml` (`ts-make`, `ts-just`) or in
+  `packageManager` (`ts-npm`), and `engines` lists both runtimes. `ts-npm` CI
+  runs Bun on Linux, macOS and Windows, plus the tests and pack check on Node
+  22 and 24.
+- Linting is still ESLint, run through `bunx`. Moving to a Bun-native linter
+  later only changes `task_lint` and `task_fmt` in `src/flavor/ts/tasks.body.sh`.
 
 [ms]: https://mise.jdx.dev
 [lh]: https://lefthook.dev
@@ -43,7 +66,7 @@ CI smoke-tests `go-make`, `go-just`, `ts-make`, `ts-npm` and `bare-make`.
 
 Every template has the same tasks (`setup`, `lint`, `test`, `release` and so
 on; `help` lists them). Each is defined once, in `scripts/tasks.sh`, and the
-Makefile, justfile or npm scripts, the git hooks and CI all call that script.
+Makefile, justfile or package.json scripts, the git hooks and CI all call that script.
 To change what `lint` does, edit it there.
 
 `setup` installs the hooks: pre-commit runs `fmt` on the staged files and then
@@ -88,11 +111,11 @@ with a regex, unless one of these is set up:
 just release v1.2.3      # or patch | minor | major
 ```
 
-The runners spell it `make release V=v1.2.3` and `npm run release -- v1.2.3`.
+The runners spell it `make release V=v1.2.3` and `bun run release v1.2.3`.
 
 `release.sh` refuses a dirty tree, an existing tag, or any branch other than
 `master` (set `RELEASE_BRANCH` to change it). It runs `preflight` (lint and
-test), bumps `package.json` for TypeScript, regenerates `CHANGELOG.md`,
+test), bumps `package.json` for TypeScript (with `bun pm version`), regenerates `CHANGELOG.md`,
 commits `chore(release): prepare for <tag>` and creates an annotated tag whose
 message is that release's changelog. Go has nothing to bump: the tag is
 injected at build time with `-ldflags`. Nothing is pushed unless you set

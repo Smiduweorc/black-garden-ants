@@ -1,6 +1,8 @@
-# Pinned tooling. Node is here because TypeScript needs it; lefthook and
-# git-cliff come as single binaries rather than through npm.
+# Pinned tooling. Bun installs the dependencies and is the main runtime; Node
+# is pinned too because the tests also run under it. lefthook and git-cliff
+# come as single binaries rather than through package.json.
 [tools]
+bun = "1.4.5"
 node = "24"
 lefthook = "2"
 git-cliff = "2"

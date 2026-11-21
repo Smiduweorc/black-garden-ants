@@ -1,12 +1,15 @@
 
 # Flavor: ts
+#
+# Bun first: it installs the dependencies and is the main runtime. Node is a
+# supported runtime too, so the tests run under both.
 
 flavor_setup() { :; }
 
 task_fmt() {
 	say "Formatting"
 	if [ "$#" -eq 0 ]; then
-		npx eslint --fix .
+		bunx eslint --fix .
 		return 0
 	fi
 	# The hook hands us every staged file; keep only the ones eslint handles.
@@ -18,28 +21,38 @@ task_fmt() {
 	done
 	shift "$staged_count"
 	[ "$#" -gt 0 ] || return 0
-	npx eslint --fix --no-warn-ignored -- "$@"
+	bunx eslint --fix --no-warn-ignored -- "$@"
 }
 
 task_lint() {
 	say "Linting"
-	npx eslint .
+	bunx eslint .
 	say "Typechecking"
-	npx tsc --noEmit
+	bunx tsc --noEmit
 	# The tests are outside the build tsconfig's rootDir, so they get their own.
 	if [ -f tests/tsconfig.json ]; then
-		npx tsc --noEmit -p tests/tsconfig.json
+		bunx tsc --noEmit -p tests/tsconfig.json
 	fi
 }
 
+# The tests use node:test and node:assert, which both runtimes run unchanged.
+# Without Node on PATH the Node run is skipped locally, but fails in CI.
 task_test() {
-	say "Running tests"
-	node --import tsx --test "tests/**/*.test.ts"
+	say "Running tests under Bun"
+	bun test
+	if have node; then
+		say "Running tests under Node"
+		node --import tsx --test "tests/**/*.test.ts"
+	elif [ -n "${CI:-}" ]; then
+		die "node not found; CI must test both runtimes"
+	else
+		say "node not found; skipping the Node test run"
+	fi
 }
 
 task_build() {
 	say "Building"
-	npx tsc
+	bunx tsc
 }
 
 task_clean() {
@@ -47,13 +60,13 @@ task_clean() {
 	rm -rf dist .eslintcache
 }
 
-# npm owns the version in package.json; print what it touched so release.sh
+# bun owns the version in package.json; print what it touched so release.sh
 # can stage it.
 task_bump_version() {
 	[ "$#" -ge 1 ] || die "usage: scripts/tasks.sh bump-version <X.Y.Z>"
-	npm version "$1" --no-git-tag-version --allow-same-version >/dev/null
+	bun pm version "$1" --no-git-tag-version --allow-same-version >/dev/null
 	echo "package.json"
-	if [ -f package-lock.json ]; then
-		echo "package-lock.json"
+	if [ -f bun.lock ]; then
+		echo "bun.lock"
 	fi
 }

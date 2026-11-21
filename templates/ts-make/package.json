@@ -14,6 +14,11 @@
 	"files": [
 		"dist"
 	],
+	"engines": {
+		"bun": ">=1.4.5",
+		"node": ">=22"
+	},
+	"packageManager": "bun@1.4.5",
 	"scripts": {
 		"setup": "scripts/tasks.sh setup",
 		"fmt": "scripts/tasks.sh fmt",
@@ -25,7 +30,8 @@
 		"preflight": "scripts/tasks.sh preflight",
 		"hooks": "scripts/tasks.sh hooks",
 		"clean": "scripts/tasks.sh clean",
-		"help": "scripts/tasks.sh help"
+		"help": "scripts/tasks.sh help",
+		"check:pack": "scripts/tasks.sh build && scripts/pack-check.sh"
 	},
 	"license": "ISC",
 	"devDependencies": {

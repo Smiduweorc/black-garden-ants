@@ -18,15 +18,16 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    name: Lint, test & build (${{ matrix.os }}, node ${{ matrix.node-version }})
+  # Bun is the primary runtime and the only package manager. Node is a
+  # supported runtime, so a second job runs the tests under each Node LTS.
+  bun:
+    name: Lint, test & build (${{ matrix.os }}, bun)
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [22.x, 24.x]
 
     # scripts/tasks.sh is a POSIX shell script, and the default shell on the
     # Windows runner is PowerShell, which cannot run it.
@@ -40,20 +41,57 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v7
+      # Reads "packageManager" from package.json, so the pin lives in one place.
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install
 
       - name: Lint
         run: scripts/tasks.sh lint
 
+      # The runners ship a Node, so this also runs the Node half of the tests.
       - name: Test
         run: scripts/tasks.sh test
 
       - name: Build
         run: scripts/tasks.sh build
+
+  node:
+    name: Test & pack check (node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x, 24.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Test
+        run: scripts/tasks.sh test
+
+      # Packs the tarball and imports it under both runtimes, as a consumer
+      # would.
+      - name: Check the packed package
+        run: |
+          scripts/tasks.sh build
+          scripts/pack-check.sh

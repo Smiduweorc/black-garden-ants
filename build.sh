@@ -40,7 +40,7 @@ runner_name() {
 	case "$1" in
 		make) echo "make" ;;
 		just) echo "just" ;;
-		npm) echo "npm run" ;;
+		npm) echo "bun run" ;;
 		*) die "no runner name for stack '$1'" ;;
 	esac
 }
@@ -49,7 +49,7 @@ release_example() {
 	case "$1" in
 		make) echo "make release V=v1.2.3" ;;
 		just) echo "just release v1.2.3" ;;
-		npm) echo "npm run release -- v1.2.3" ;;
+		npm) echo "bun run release v1.2.3" ;;
 		*) die "no release example for stack '$1'" ;;
 	esac
 }
@@ -70,8 +70,9 @@ for combo in "${COMBOS[@]}"; do
 	cp -a "src/flavor/$flavor/." "$out/"
 	rm -f "$out/tasks.body.sh"
 
-	# The npm stack installs its tools from devDependencies, so it has no
-	# mise.toml and brings its own CI workflow.
+	# The npm stack (package.json scripts, installed with bun) gets its tools
+	# from devDependencies, so it has no mise.toml and brings its own CI
+	# workflow.
 	if [ "$stack" = npm ]; then
 		rm -f "$out/mise.toml"
 	else
@@ -91,8 +92,8 @@ for combo in "${COMBOS[@]}"; do
 	runner="$(runner_name "$stack")"
 	example="$(release_example "$stack")"
 
-	# lefthook and git-cliff come from devDependencies here, and npm's own
-	# prepare lifecycle installs the hooks.
+	# lefthook and git-cliff come from devDependencies here, and the package
+	# manager's prepare lifecycle installs the hooks.
 	if [ "$stack" = npm ]; then
 		python3 - "$out/package.json" <<-'PY'
 			import json, sys, collections

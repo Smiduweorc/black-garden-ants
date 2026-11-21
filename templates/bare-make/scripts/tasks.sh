@@ -95,7 +95,7 @@ task_bump_version() { :; }
 # Everything below is shared by every flavor.
 
 # Bootstrap reacts to which files the template has, so the mise-based and
-# npm-based stacks share one code path.
+# package.json-based stacks share one code path.
 task_setup() {
 	if [ -f mise.toml ]; then
 		have mise || die "mise not found. Install it: https://mise.jdx.dev"
@@ -103,8 +103,9 @@ task_setup() {
 		mise install
 	fi
 	if [ -f package.json ]; then
-		say "Installing npm dependencies"
-		if [ -f package-lock.json ]; then npm ci; else npm install; fi
+		have bun || die "bun not found. Install it: https://bun.com"
+		say "Installing dependencies"
+		if [ -f bun.lock ]; then bun install --frozen-lockfile; else bun install; fi
 	fi
 	flavor_setup
 	task_hooks

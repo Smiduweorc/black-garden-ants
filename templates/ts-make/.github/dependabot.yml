@@ -2,7 +2,7 @@ version: 2
 updates:
   # "include: scope" makes the messages chore(deps): ..., which cliff.toml
   # skips, so dependency bumps stay out of CHANGELOG.md.
-  - package-ecosystem: npm
+  - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
