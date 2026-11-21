@@ -53,6 +53,13 @@ jobs:
           scripts/tasks.sh lint
           scripts/tasks.sh test
           scripts/tasks.sh build
+      - name: commit-msg accepts and rejects through go tool commitlint
+        working-directory: templates/${{ matrix.template }}
+        run: |
+          printf 'feat: add the widget\n' > "$RUNNER_TEMP/good"
+          printf 'not conventional\n' > "$RUNNER_TEMP/bad"
+          scripts/commit-msg.sh "$RUNNER_TEMP/good"
+          ! scripts/commit-msg.sh "$RUNNER_TEMP/bad"
 
   smoke-ts:
     name: Smoke test (${{ matrix.template }})

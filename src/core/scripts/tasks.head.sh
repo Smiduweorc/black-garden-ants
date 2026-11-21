@@ -27,7 +27,7 @@ cliff() {
 }
 
 # lefthook, likewise.
-lefthook() {
+run_lefthook() {
 	if have lefthook; then
 		command lefthook "$@"
 	elif [ -x node_modules/.bin/lefthook ]; then

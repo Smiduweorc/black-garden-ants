@@ -27,7 +27,7 @@ cliff() {
 }
 
 # lefthook, likewise.
-lefthook() {
+run_lefthook() {
 	if have lefthook; then
 		command lefthook "$@"
 	elif [ -x node_modules/.bin/lefthook ]; then
@@ -136,7 +136,7 @@ task_hooks() {
 		return 0
 	fi
 	say "Installing git hooks"
-	lefthook install
+	run_lefthook install
 }
 
 task_help() {
